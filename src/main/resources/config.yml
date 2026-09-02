@@ -1,0 +1,25 @@
+security:
+  # Generated automatically on first startup. Do not share or edit after vouchers have been issued.
+  signing-secret: ""
+
+messages:
+  invalid-item: "&cThis redeem item is invalid or has been modified."
+  command-failed: "&cRedeem failed. Your item was not consumed. Please contact staff."
+  no-permission: "&cYou do not have permission to use this command."
+  unknown-redeem: "&cUnknown redeem id: &f%redeem%"
+  player-not-found: "&cPlayer not found: &f%player%"
+  given: "&aGave &f%amount%x &a%redeem% &ato &f%player%&a."
+  reloaded: "&aMiraRedeem reloaded."
+
+redeems:
+  pyro_axe:
+    material: PAPER
+    name: "&6&lPyro Axe Voucher"
+    lore:
+      - "&7Right-click to redeem."
+      - "&7Grants: &6Pyro Axe"
+      - ""
+      - "&cThis item cannot be modified."
+    commands:
+      - "mitem give %player% pyro_axe"
+    success-message: "&aYou redeemed a &6Pyro Axe&a!"
