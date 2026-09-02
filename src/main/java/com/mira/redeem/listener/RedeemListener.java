@@ -5,6 +5,7 @@ import com.mira.redeem.model.RedeemDefinition;
 import com.mira.redeem.service.RedeemService;
 import com.mira.redeem.util.TextUtil;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -25,14 +26,21 @@ public final class RedeemListener implements Listener {
         this.service = service;
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.getHand() == null) return;
 
-        ItemStack item = event.getItem();
+        EquipmentSlot hand = event.getHand();
+        ItemStack item = hand == EquipmentSlot.HAND
+                ? event.getPlayer().getInventory().getItemInMainHand()
+                : event.getPlayer().getInventory().getItemInOffHand();
+
         if (!service.isTagged(item)) return;
 
+        // A MiraRedeem voucher is a self-contained usable object. Once identified,
+        // its redemption should not depend on whether another plugin cancelled the
+        // underlying air/block interaction.
         event.setCancelled(true);
 
         if (!service.isAuthentic(item)) {
@@ -57,7 +65,7 @@ public final class RedeemListener implements Listener {
             }
 
             event.getPlayer().sendMessage(TextUtil.component(definition.successMessage()));
-            consumeOne(event.getPlayer(), event.getHand());
+            consumeOne(event.getPlayer(), hand);
         } finally {
             plugin.getServer().getScheduler().runTask(plugin, () -> redeeming.remove(uuid));
         }
