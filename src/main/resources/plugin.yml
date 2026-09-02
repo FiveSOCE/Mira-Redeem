@@ -1,0 +1,17 @@
+name: MiraRedeem
+version: 0.1.0
+main: com.mira.redeem.MiraRedeemPlugin
+api-version: '1.21'
+authors: [FiveS]
+description: Secure one-time redeemable items for the Mira plugin ecosystem.
+
+commands:
+  miraredeem:
+    description: MiraRedeem administration command.
+    usage: /miraredeem <give|list|reload>
+    aliases: [mredeem]
+
+permissions:
+  miraredeem.admin:
+    description: Allows MiraRedeem administration commands.
+    default: op
