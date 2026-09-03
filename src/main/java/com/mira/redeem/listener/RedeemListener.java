@@ -38,13 +38,10 @@ public final class RedeemListener implements Listener {
 
         if (!service.isTagged(item)) return;
 
-        // A MiraRedeem voucher is a self-contained usable object. Once identified,
-        // its redemption should not depend on whether another plugin cancelled the
-        // underlying air/block interaction.
         event.setCancelled(true);
 
         if (!service.isAuthentic(item)) {
-            event.getPlayer().sendMessage(TextUtil.component(service.message("invalid-item")));
+            event.getPlayer().sendMessage(TextUtil.chat(service.message("invalid-item")));
             return;
         }
 
@@ -55,16 +52,16 @@ public final class RedeemListener implements Listener {
             String id = service.redeemId(item);
             RedeemDefinition definition = service.definition(id).orElse(null);
             if (definition == null) {
-                event.getPlayer().sendMessage(TextUtil.component(service.message("invalid-item")));
+                event.getPlayer().sendMessage(TextUtil.chat(service.message("invalid-item")));
                 return;
             }
 
             if (!service.execute(event.getPlayer(), definition)) {
-                event.getPlayer().sendMessage(TextUtil.component(service.message("command-failed")));
+                event.getPlayer().sendMessage(TextUtil.chat(service.message("command-failed")));
                 return;
             }
 
-            event.getPlayer().sendMessage(TextUtil.component(definition.successMessage()));
+            event.getPlayer().sendMessage(TextUtil.chat(definition.successMessage()));
             consumeOne(event.getPlayer(), hand);
         } finally {
             plugin.getServer().getScheduler().runTask(plugin, () -> redeeming.remove(uuid));
