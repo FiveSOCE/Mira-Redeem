@@ -24,42 +24,42 @@ public final class MiraRedeemCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("miraredeem.admin")) {
-            sender.sendMessage(TextUtil.component(service.message("no-permission")));
+            sender.sendMessage(TextUtil.chat(service.message("no-permission")));
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendMessage(TextUtil.component("&6MiraRedeem &7- /" + label + " <give|list|reload>"));
+            sender.sendMessage(TextUtil.chat("&6MiraRedeem &7- /" + label + " <give|list|reload>"));
             return true;
         }
 
         switch (args[0].toLowerCase(Locale.ROOT)) {
             case "give" -> handleGive(sender, args);
-            case "list" -> sender.sendMessage(TextUtil.component("&6Redeems: &f" + String.join(", ", service.ids())));
+            case "list" -> sender.sendMessage(TextUtil.chat("&6Redeems: &f" + String.join(", ", service.ids())));
             case "reload" -> {
                 service.reload();
-                sender.sendMessage(TextUtil.component(service.message("reloaded")));
+                sender.sendMessage(TextUtil.chat(service.message("reloaded")));
             }
-            default -> sender.sendMessage(TextUtil.component("&cUsage: /" + label + " <give|list|reload>"));
+            default -> sender.sendMessage(TextUtil.chat("&cUsage: /" + label + " <give|list|reload>"));
         }
         return true;
     }
 
     private void handleGive(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(TextUtil.component("&cUsage: /miraredeem give <player> <redeem> [amount]"));
+            sender.sendMessage(TextUtil.chat("&cUsage: /miraredeem give <player> <redeem> [amount]"));
             return;
         }
 
         Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
-            sender.sendMessage(TextUtil.component(service.message("player-not-found").replace("%player%", args[1])));
+            sender.sendMessage(TextUtil.chat(service.message("player-not-found").replace("%player%", args[1])));
             return;
         }
 
         String id = args[2].toLowerCase(Locale.ROOT);
         if (service.definition(id).isEmpty()) {
-            sender.sendMessage(TextUtil.component(service.message("unknown-redeem").replace("%redeem%", id)));
+            sender.sendMessage(TextUtil.chat(service.message("unknown-redeem").replace("%redeem%", id)));
             return;
         }
 
@@ -68,7 +68,7 @@ public final class MiraRedeemCommand implements CommandExecutor, TabCompleter {
             try {
                 amount = Math.max(1, Math.min(64, Integer.parseInt(args[3])));
             } catch (NumberFormatException ex) {
-                sender.sendMessage(TextUtil.component("&cAmount must be a number from 1 to 64."));
+                sender.sendMessage(TextUtil.chat("&cAmount must be a number from 1 to 64."));
                 return;
             }
         }
@@ -77,7 +77,7 @@ public final class MiraRedeemCommand implements CommandExecutor, TabCompleter {
         var leftovers = target.getInventory().addItem(item);
         leftovers.values().forEach(leftover -> target.getWorld().dropItemNaturally(target.getLocation(), leftover));
 
-        sender.sendMessage(TextUtil.component(service.message("given")
+        sender.sendMessage(TextUtil.chat(service.message("given")
                 .replace("%amount%", String.valueOf(amount))
                 .replace("%redeem%", id)
                 .replace("%player%", target.getName())));
