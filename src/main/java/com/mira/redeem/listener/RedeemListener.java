@@ -56,6 +56,12 @@ public final class RedeemListener implements Listener {
                 return;
             }
 
+            RedeemService.ValidationResult validation = service.validate(event.getPlayer(), definition);
+            if (!validation.allowed()) {
+                event.getPlayer().sendMessage(TextUtil.chat(validation.message()));
+                return;
+            }
+
             if (!service.execute(event.getPlayer(), definition)) {
                 event.getPlayer().sendMessage(TextUtil.chat(service.message("command-failed")));
                 return;
