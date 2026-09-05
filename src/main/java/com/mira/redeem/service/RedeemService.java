@@ -5,7 +5,7 @@ import com.mira.redeem.model.RedeemDefinition;
 import com.mira.redeem.model.RedeemType;
 import com.mira.redeem.util.TextUtil;
 import net.luckperms.api.LuckPerms;
-import net.luckperms.api.model.track.Track;
+import net.luckperms.api.track.Track;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
