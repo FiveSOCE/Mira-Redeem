@@ -2,7 +2,13 @@ package com.mira.redeem.service;
 
 import com.mira.redeem.MiraRedeemPlugin;
 import com.mira.redeem.model.RedeemDefinition;
+import com.mira.redeem.model.RedeemType;
 import com.mira.redeem.util.TextUtil;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.model.track.Track;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -22,10 +28,12 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public final class RedeemService {
     private final MiraRedeemPlugin plugin;
@@ -59,17 +67,32 @@ public final class RedeemService {
                 continue;
             }
 
+            RedeemType type;
+            try {
+                type = RedeemType.valueOf(section.getString("type", "COMMAND").trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                plugin.getLogger().warning("Skipping redeem '" + rawId + "': invalid type.");
+                continue;
+            }
+
             String name = section.getString("name", "&fRedeem Voucher");
             List<String> lore = new ArrayList<>(section.getStringList("lore"));
             List<String> commands = new ArrayList<>(section.getStringList("commands"));
             String successMessage = section.getString("success-message", "&aRedeemed successfully.");
+            String track = normalize(section.getString("track", ""));
+            String targetGroup = normalize(section.getString("target-group", ""));
 
-            if (commands.isEmpty()) {
+            if (type == RedeemType.COMMAND && commands.isEmpty()) {
                 plugin.getLogger().warning("Skipping redeem '" + rawId + "': no commands configured.");
                 continue;
             }
+            if (type == RedeemType.RANK && (track.isBlank() || targetGroup.isBlank())) {
+                plugin.getLogger().warning("Skipping rank redeem '" + rawId + "': track and target-group are required.");
+                continue;
+            }
 
-            definitions.put(id, new RedeemDefinition(id, material, name, lore, commands, successMessage));
+            definitions.put(id, new RedeemDefinition(id, type, material, name, lore, commands,
+                    successMessage, track, targetGroup));
         }
 
         plugin.getLogger().info("Loaded " + definitions.size() + " redeem definition(s).");
@@ -145,7 +168,69 @@ public final class RedeemService {
         return item.getItemMeta().getPersistentDataContainer().get(redeemIdKey, PersistentDataType.STRING);
     }
 
+    public ValidationResult validate(Player player, RedeemDefinition definition) {
+        if (definition.type() != RedeemType.RANK) return ValidationResult.allowed();
+
+        LuckPerms luckPerms = Bukkit.getServicesManager().load(LuckPerms.class);
+        if (luckPerms == null) {
+            return ValidationResult.blocked(message("rank-unavailable"));
+        }
+
+        Track track = luckPerms.getTrackManager().getTrack(definition.track());
+        if (track == null) {
+            return ValidationResult.blocked(message("rank-track-missing")
+                    .replace("%track%", definition.track()));
+        }
+
+        List<String> groups = track.getGroups();
+        int targetIndex = indexOfIgnoreCase(groups, definition.targetGroup());
+        if (targetIndex < 0) {
+            return ValidationResult.blocked(message("rank-target-missing")
+                    .replace("%rank%", definition.targetGroup())
+                    .replace("%track%", definition.track()));
+        }
+
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
+            return ValidationResult.blocked(message("rank-user-unavailable"));
+        }
+
+        Set<String> directOnTrack = new LinkedHashSet<>();
+        for (InheritanceNode node : user.getNodes(NodeType.INHERITANCE)) {
+            if (indexOfIgnoreCase(groups, node.getGroupName()) >= 0) {
+                directOnTrack.add(node.getGroupName());
+            }
+        }
+
+        if (directOnTrack.size() > 1) {
+            return ValidationResult.blocked(message("rank-ambiguous")
+                    .replace("%track%", definition.track()));
+        }
+
+        if (directOnTrack.isEmpty()) {
+            return ValidationResult.allowed();
+        }
+
+        String current = directOnTrack.iterator().next();
+        int currentIndex = indexOfIgnoreCase(groups, current);
+        if (currentIndex == targetIndex) {
+            return ValidationResult.blocked(message("rank-same")
+                    .replace("%rank%", definition.targetGroup()));
+        }
+        if (currentIndex > targetIndex) {
+            return ValidationResult.blocked(message("rank-lower")
+                    .replace("%current%", current)
+                    .replace("%rank%", definition.targetGroup()));
+        }
+
+        return ValidationResult.allowed();
+    }
+
     public boolean execute(Player player, RedeemDefinition definition) {
+        if (definition.type() == RedeemType.RANK) {
+            return executeRank(player, definition);
+        }
+
         for (String configured : definition.commands()) {
             String command = configured
                     .replace("%player%", player.getName())
@@ -157,10 +242,36 @@ public final class RedeemService {
 
             boolean dispatched = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
             if (!dispatched) {
-                plugin.getLogger().warning("Redeem '" + definition.id() + "' command failed to dispatch for " + player.getName() + ": " + command);
+                plugin.getLogger().warning("Redeem '" + definition.id() + "' command failed to dispatch for "
+                        + player.getName() + ": " + command);
                 return false;
             }
         }
+        return true;
+    }
+
+    private boolean executeRank(Player player, RedeemDefinition definition) {
+        LuckPerms luckPerms = Bukkit.getServicesManager().load(LuckPerms.class);
+        if (luckPerms == null) return false;
+        Track track = luckPerms.getTrackManager().getTrack(definition.track());
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (track == null || user == null) return false;
+
+        List<String> groups = track.getGroups();
+        if (indexOfIgnoreCase(groups, definition.targetGroup()) < 0) return false;
+
+        String oldPrimary = user.getPrimaryGroup();
+        for (InheritanceNode node : new ArrayList<>(user.getNodes(NodeType.INHERITANCE))) {
+            if (indexOfIgnoreCase(groups, node.getGroupName()) >= 0) {
+                user.data().remove(node);
+            }
+        }
+
+        user.data().add(InheritanceNode.builder(definition.targetGroup()).build());
+        if (indexOfIgnoreCase(groups, oldPrimary) >= 0) {
+            user.setPrimaryGroup(definition.targetGroup());
+        }
+        luckPerms.getUserManager().saveUser(user);
         return true;
     }
 
@@ -179,7 +290,24 @@ public final class RedeemService {
         }
     }
 
+    private static int indexOfIgnoreCase(List<String> values, String target) {
+        for (int i = 0; i < values.size(); i++) {
+            if (values.get(i).equalsIgnoreCase(target)) return i;
+        }
+        return -1;
+    }
+
     private static String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+
+    public record ValidationResult(boolean allowed, String message) {
+        public static ValidationResult allowed() {
+            return new ValidationResult(true, "");
+        }
+
+        public static ValidationResult blocked(String message) {
+            return new ValidationResult(false, message == null ? "" : message);
+        }
     }
 }
