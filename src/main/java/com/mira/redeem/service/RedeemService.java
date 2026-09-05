@@ -169,30 +169,30 @@ public final class RedeemService {
     }
 
     public ValidationResult validate(Player player, RedeemDefinition definition) {
-        if (definition.type() != RedeemType.RANK) return ValidationResult.allowed();
+        if (definition.type() != RedeemType.RANK) return ValidationResult.pass();
 
         LuckPerms luckPerms = Bukkit.getServicesManager().load(LuckPerms.class);
         if (luckPerms == null) {
-            return ValidationResult.blocked(message("rank-unavailable"));
+            return ValidationResult.block(message("rank-unavailable"));
         }
 
         Track track = luckPerms.getTrackManager().getTrack(definition.track());
         if (track == null) {
-            return ValidationResult.blocked(message("rank-track-missing")
+            return ValidationResult.block(message("rank-track-missing")
                     .replace("%track%", definition.track()));
         }
 
         List<String> groups = track.getGroups();
         int targetIndex = indexOfIgnoreCase(groups, definition.targetGroup());
         if (targetIndex < 0) {
-            return ValidationResult.blocked(message("rank-target-missing")
+            return ValidationResult.block(message("rank-target-missing")
                     .replace("%rank%", definition.targetGroup())
                     .replace("%track%", definition.track()));
         }
 
         User user = luckPerms.getUserManager().getUser(player.getUniqueId());
         if (user == null) {
-            return ValidationResult.blocked(message("rank-user-unavailable"));
+            return ValidationResult.block(message("rank-user-unavailable"));
         }
 
         Set<String> directOnTrack = new LinkedHashSet<>();
@@ -203,27 +203,27 @@ public final class RedeemService {
         }
 
         if (directOnTrack.size() > 1) {
-            return ValidationResult.blocked(message("rank-ambiguous")
+            return ValidationResult.block(message("rank-ambiguous")
                     .replace("%track%", definition.track()));
         }
 
         if (directOnTrack.isEmpty()) {
-            return ValidationResult.allowed();
+            return ValidationResult.pass();
         }
 
         String current = directOnTrack.iterator().next();
         int currentIndex = indexOfIgnoreCase(groups, current);
         if (currentIndex == targetIndex) {
-            return ValidationResult.blocked(message("rank-same")
+            return ValidationResult.block(message("rank-same")
                     .replace("%rank%", definition.targetGroup()));
         }
         if (currentIndex > targetIndex) {
-            return ValidationResult.blocked(message("rank-lower")
+            return ValidationResult.block(message("rank-lower")
                     .replace("%current%", current)
                     .replace("%rank%", definition.targetGroup()));
         }
 
-        return ValidationResult.allowed();
+        return ValidationResult.pass();
     }
 
     public boolean execute(Player player, RedeemDefinition definition) {
@@ -302,11 +302,11 @@ public final class RedeemService {
     }
 
     public record ValidationResult(boolean allowed, String message) {
-        public static ValidationResult allowed() {
+        public static ValidationResult pass() {
             return new ValidationResult(true, "");
         }
 
-        public static ValidationResult blocked(String message) {
+        public static ValidationResult block(String message) {
             return new ValidationResult(false, message == null ? "" : message);
         }
     }
