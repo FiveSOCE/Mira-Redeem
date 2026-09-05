@@ -10,6 +10,13 @@ messages:
   player-not-found: "&cPlayer not found: &f%player%"
   given: "&aGave &f%amount%x &a%redeem% &ato &f%player%&a."
   reloaded: "&aMiraRedeem reloaded."
+  rank-unavailable: "&cRank vouchers are temporarily unavailable because LuckPerms is not loaded. Your voucher was not consumed."
+  rank-track-missing: "&cRank voucher configuration error: track &f%track% &cdoes not exist. Your voucher was not consumed."
+  rank-target-missing: "&cRank voucher configuration error: &f%rank% &cis not on track &f%track%&c. Your voucher was not consumed."
+  rank-user-unavailable: "&cYour LuckPerms profile is not currently available. Your voucher was not consumed."
+  rank-ambiguous: "&cYour rank data has multiple groups on the &f%track% &ctrack. Please contact staff. Your voucher was not consumed."
+  rank-same: "&eYou already have the &f%rank% &erank. This voucher was not consumed."
+  rank-lower: "&cYou already have a higher rank (&f%current%&c) than &f%rank%&c. This voucher was not consumed."
 
 redeems:
   pyro_axe:
@@ -23,3 +30,17 @@ redeems:
     commands:
       - "mitem give %player% pyro_axe"
     success-message: "&aYou redeemed a &6Pyro Axe&a!"
+
+
+# Rank voucher example:
+# rank_legend:
+#   type: RANK
+#   material: PAPER
+#   name: "&6&lLegend Rank Voucher"
+#   lore:
+#     - "&7Right-click to redeem."
+#     - "&7Upgrades your rank to &6Legend&7."
+#     - "&7Lower/equal-rank redemptions are blocked."
+#   track: ranks
+#   target-group: legend
+#   success-message: "&aYour rank was upgraded to &6Legend&a!"
