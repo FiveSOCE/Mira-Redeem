@@ -4,7 +4,7 @@ MiraRedeem provides secure one-time physical redeem items for the Mira Paper ser
 
 ## Download
 
-[**Download MiraRedeem v0.1.2**](https://github.com/FiveSOCE/Mira-Redeem/releases/download/v0.1.2/MiraRedeem-0.1.2.jar)
+[**Download MiraRedeem v0.1.2**](https://github.com/FiveSOCE/Mira-Redeem/releases/download/v0.1.3/MiraRedeem-0.1.3.jar)
 
 ## Requirements / Dependencies
 
