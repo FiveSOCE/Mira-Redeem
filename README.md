@@ -1,10 +1,14 @@
 # MiraRedeem
 
-MiraRedeem provides secure one-time physical redeem items for the Mira Paper server suite. Each voucher has hidden signed identity and executes one or more configured console commands when a player successfully redeems it.
-
 ## Download
 
-[**Download MiraRedeem v0.1.2**](https://github.com/FiveSOCE/Mira-Redeem/releases/download/v0.1.3/MiraRedeem-0.1.3.jar)
+**Latest compatibility release: v0.1.3**
+
+[**Download MiraRedeem-0.1.3.jar**](https://github.com/FiveSOCE/Mira-Redeem/releases/download/v0.1.3/MiraRedeem-0.1.3.jar)
+
+[View all releases](https://github.com/FiveSOCE/Mira-Redeem/releases)
+
+MiraRedeem provides secure one-time physical redeem items for the Mira Paper server suite. Each voucher has hidden signed identity and executes one or more configured console commands when a player successfully redeems it.
 
 ## Requirements / Dependencies
 
