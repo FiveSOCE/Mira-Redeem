@@ -8,7 +8,6 @@ import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
-import org.bukkit.event.inventory.PrepareGrindstoneEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.Inventory;
@@ -26,10 +25,6 @@ public final class ProtectionListener implements Listener {
         if (containsRedeem(event.getInventory())) event.setResult(null);
     }
 
-    @EventHandler
-    public void onPrepareGrindstone(PrepareGrindstoneEvent event) {
-        if (containsRedeem(event.getInventory())) event.setResult(null);
-    }
 
     @EventHandler
     public void onPrepareSmithing(PrepareSmithingEvent event) {
