@@ -1,21 +1,34 @@
 # MiraRedeem
 
-## Download
+## Downloads by server version
 
-**Latest compatibility release: v0.1.3**
+| Paper target | Java | JAR | Download |
+| --- | --- | --- | --- |
+| **1.18.2** | 17 | `MiraRedeem_1.18.2.jar` | [Legacy release](https://github.com/FiveSOCE/Mira-Redeem/releases/tag/dev-1.18.2) |
+| **1.21.11–26.2** | Java 21 baseline; newer server may need Java 25 | `MiraRedeem_1.21.11-26.2.jar` | [Modern release](https://github.com/FiveSOCE/Mira-Redeem/releases/tag/compat-modern-1.21.11-26.2) |
 
-[**Download MiraRedeem-0.1.3.jar**](https://github.com/FiveSOCE/Mira-Redeem/releases/download/v0.1.3/MiraRedeem-0.1.3.jar)
+These downloads require successful GitHub CI and publication of the named JAR. **Intermediate Paper 1.19–1.21.10 and live-server feature parity are not yet certified.** Install only one version-specific JAR.
 
-[View all releases](https://github.com/FiveSOCE/Mira-Redeem/releases)
+[Legacy source](https://github.com/FiveSOCE/Mira-Redeem/tree/compat/1.18.2) · [Modern source](https://github.com/FiveSOCE/Mira-Redeem) · [All releases](https://github.com/FiveSOCE/Mira-Redeem/releases)
 
-MiraRedeem provides secure one-time physical redeem items for the Mira Paper server suite. Each voucher has hidden signed identity and executes one or more configured console commands when a player successfully redeems it.
+MiraRedeem issues cryptographically signed, single-use physical vouchers for server rewards. It validates the item and signature before running configured console commands and consuming exactly one voucher.
 
-## Requirements / Dependencies
+## Dependencies
 
-- Paper 1.21.11
-- Java 21
-- LuckPerms optional for normal command vouchers; required only when using RANK vouchers
-- Any plugin/command referenced by a redeem definition must of course be installed for that reward command to succeed
+- **Required:** Matching Paper server and Java runtime.
+- **Optional:** LuckPerms for rank voucher validation and promotion. **Rank-type vouchers require LuckPerms to function.**
+- **MiraCore:** Not required. The plugin is independently installed.
+- Reward commands may depend on other installed plugins. Back up `plugins/MiraRedeem/` and your signing key before any migration.
+
+## Commands and permissions
+
+| Command | Permission | Function |
+| --- | --- | --- |
+| `/miraredeem give <player> <redeem> [amount]` | `miraredeem.admin` | Generate authenticated vouchers |
+| `/miraredeem list` | `miraredeem.admin` | Show configured voucher types |
+| `/miraredeem reload` | `miraredeem.admin` | Reload settings and definitions |
+
+Alias: `/mredeem`. `miraredeem.admin` defaults to OP. Players redeem vouchers by right-clicking, without an admin command.
 
 ## How MiraRedeem Works
 
