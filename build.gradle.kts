@@ -29,5 +29,5 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.jar {
-    archiveFileName.set("MiraRedeem-${project.version}.jar")
+    archiveFileName.set("MiraRedeem_1.21.11-26.2.jar")
 }
