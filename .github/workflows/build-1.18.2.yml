@@ -1,0 +1,43 @@
+name: MiraRedeem Paper 1.18.2
+on:
+  push:
+    branches: ['compat/1.18.2']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  legacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+      - name: Compile and test
+        run: gradle clean test build --no-daemon --stacktrace
+      - name: Verify legacy JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR=build/libs/MiraRedeem_1.18.2.jar
+          test -s "$JAR"
+          jar tf "$JAR" | grep -Fx plugin.yml
+          jar tf "$JAR" | grep -Fx com/mira/redeem/MiraRedeemPlugin.class
+          javap -verbose -classpath "$JAR" com.mira.redeem.MiraRedeemPlugin | grep -F 'major version: 61'
+          unzip -p "$JAR" plugin.yml | grep -F "api-version: '1.18'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MiraRedeem_1.18.2
+          path: build/libs/MiraRedeem_1.18.2.jar
+          if-no-files-found: error
+      - name: Publish legacy development JAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view dev-1.18.2 >/dev/null 2>&1 || gh release create dev-1.18.2 --prerelease --title 'MiraRedeem Paper 1.18.2' --notes 'Paper 1.18.2 / Java 17, standalone; LuckPerms optional but required for rank vouchers. In-game verification outstanding.' --target "$GITHUB_SHA"
+          gh release upload dev-1.18.2 build/libs/MiraRedeem_1.18.2.jar --clobber
