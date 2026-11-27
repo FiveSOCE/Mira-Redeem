@@ -4,10 +4,10 @@
 
 | Paper target | Java | JAR | Download |
 | --- | --- | --- | --- |
-| **1.18.2** | 17 | `MiraRedeem_1.18.2.jar` | [Legacy release](https://github.com/FiveSOCE/Mira-Redeem/releases/tag/dev-1.18.2) |
-| **1.21.11–26.2** | Java 21 baseline; newer server may need Java 25 | `MiraRedeem_1.21.11-26.2.jar` | [Modern release](https://github.com/FiveSOCE/Mira-Redeem/releases/tag/compat-modern-1.21.11-26.2) |
+| **1.18.2** | 17 | `MiraRedeem_1.18.2.jar` | [Download legacy JAR](https://github.com/FiveSOCE/Mira-Redeem/releases/download/dev-1.18.2/MiraRedeem_1.18.2.jar) |
+| **1.21.11–26.2** | Java 21 baseline; newer server may need Java 25 | `MiraRedeem_1.21.11-26.2.jar` | [Download modern JAR](https://github.com/FiveSOCE/Mira-Redeem/releases/download/compat-modern-1.21.11-26.2/MiraRedeem_1.21.11-26.2.jar) |
 
-These downloads require successful GitHub CI and publication of the named JAR. **Intermediate Paper 1.19–1.21.10 and live-server feature parity are not yet certified.** Install only one version-specific JAR.
+Both version-named GitHub release assets have passed CI and been verified. **Intermediate Paper 1.19–1.21.10 and live-server feature parity are not yet certified.** Install only one version-specific JAR.
 
 [Legacy source](https://github.com/FiveSOCE/Mira-Redeem/tree/compat/1.18.2) · [Modern source](https://github.com/FiveSOCE/Mira-Redeem) · [All releases](https://github.com/FiveSOCE/Mira-Redeem/releases)
 
@@ -29,6 +29,8 @@ MiraRedeem issues cryptographically signed, single-use physical vouchers for ser
 | `/miraredeem reload` | `miraredeem.admin` | Reload settings and definitions |
 
 Alias: `/mredeem`. `miraredeem.admin` defaults to OP. Players redeem vouchers by right-clicking, without an admin command.
+
+**Legacy protection note:** Paper 1.18.2 does not provide `PrepareGrindstoneEvent`; legacy grindstone output is protected through an existing `InventoryClickEvent` result-slot check. Runtime bypass testing is still required.
 
 ## How MiraRedeem Works
 
